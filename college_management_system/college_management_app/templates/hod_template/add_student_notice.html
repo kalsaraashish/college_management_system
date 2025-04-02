@@ -1,0 +1,115 @@
+{% extends 'hod_template/base_template.html' %}
+{% block page_title %}
+Add Student Notice
+{% endblock page_title %}
+{% block main_content %}
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="form-group">
+            {% if messages %}
+                {% for message in messages %}
+                    {% if message.tags == 'error' %}
+                        <div class="alert alert-danger" style="margin-top:10px">{{ message }}</div>
+                    {% elif message.tags == 'success' %}
+                        <div class="alert alert-success" style="margin-top:10px">{{ message }}</div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <!-- general form elements -->
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Add Notice</h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <!-- form start -->
+                    <form role="form" action="{% url 'add_student_notice_save' %}" method="post">
+                        {% csrf_token %}
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label>Notice Title</label>
+                                <input type="text" class="form-control" name="title" placeholder="Enter Notice Title">
+                            </div>
+                            <div class="form-group">
+                                <label>Notice Content</label>
+                                <textarea class="form-control" name="content" rows="4" placeholder="Enter Notice Content"></textarea>
+                            </div>
+                        </div>
+                        <!-- /.card-body -->
+
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary btn-block">Add Notice</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+
+
+        </div>
+    </div><!-- /.container-fluid -->
+</section>
+<!-- /.content -->
+{% endblock main_content %}
+{% block custom_js %}
+<script>
+    $(document).ready(function () {
+        let titleInput = $("input[name='title']");
+        let contentInput = $("textarea[name='content']");
+        let submitBtn = $("button[type='submit']");
+
+        function validateNoticeForm() {
+            let valid = true;
+            let title = titleInput.val().trim();
+            let content = contentInput.val().trim();
+
+            // Check if the title is empty
+            if (title === "") {
+                showError(titleInput, "Notice title cannot be empty.");
+                valid = false;
+            } else {
+                removeError(titleInput);
+            }
+
+            // Check if the content is empty
+            if (content === "") {
+                showError(contentInput, "Notice content cannot be empty.");
+                valid = false;
+            } else {
+                removeError(contentInput);
+            }
+
+            // Enable/Disable Submit Button
+            submitBtn.prop("disabled", !valid);
+        }
+
+        function showError(input, message) {
+            removeError(input);
+            $("<span class='error-message' style='color: red; font-size: 14px; display: block; margin-top: 5px;'>"
+                + message + "</span>").insertAfter(input);
+        }
+
+        function removeError(input) {
+            input.next(".error-message").remove();
+        }
+
+        // Attach event listener for real-time validation
+        titleInput.keyup(validateNoticeForm);
+        contentInput.keyup(validateNoticeForm);
+
+        // Validate on form submission
+        $("form").submit(function (event) {
+            validateNoticeForm();
+            if (submitBtn.prop("disabled")) {
+                event.preventDefault(); // Prevent form submission if invalid
+            }
+        });
+
+        // Initial validation check
+        validateNoticeForm();
+    });
+</script>
+{% endblock custom_js %}

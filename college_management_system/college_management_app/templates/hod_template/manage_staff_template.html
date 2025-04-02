@@ -1,0 +1,159 @@
+{% extends 'hod_template/base_template.html' %}
+{% block page_title %}
+Manage Staff
+{% endblock page_title %}
+{% block main_content %}
+<section class="content">
+  <div class="container-fluid">
+    <div class="form-group">
+      {% if messages %}
+        {% for message in messages %}
+          {% if message.tags == 'error' %}
+            <div class="alert alert-danger" style="margin-top:10px">{{ message }}</div>
+          {% endif %}
+          {% if message.tags == 'success' %}
+            <div class="alert alert-success" style="margin-top:10px">{{ message }}</div>
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+    </div>
+
+    <!-- Enhanced Search Box -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-header bg-light">
+        <h3 class="card-title">Search Staff</h3>
+      </div>
+      <div class="card-body">
+        <div class="input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text"><i class="fas fa-search"></i></span>
+          </div>
+          <input type="text" id="search-input" class="form-control" placeholder="Search by Name or Username">
+        </div>
+      </div>
+    </div>
+    <!-- End Enhanced Search Box -->
+
+    <div class="row">
+      <div class="col-12">
+        <div class="card shadow-sm rounded">
+          <div class="card-header bg-primary text-white">
+            <h3 class="card-title">Staff Details</h3>
+          </div>
+
+          <!-- Table -->
+          <div class="card-body table-responsive p-0">
+            <table class="table table-striped table-hover text-nowrap">
+              <thead class="bg-light">
+                <tr>
+                  <th>ID</th>
+                  <th>First Name</th>
+                  <th>Last Name</th>
+                  <th>Username</th>
+                  <th>Profile Pic</th>
+                  <th>Email</th>
+                  <th>Mobile Number</th>
+                  <th>Address</th>
+                  <th>Last Login</th>
+                  <th>Date Joined</th>
+                  <th class="text-center">Action</th>
+                </tr>
+              </thead>
+              <tbody id="staff-table-body">
+                {% for staff in staffs %}
+                  <tr>
+                    <td>{{ staff.admin.id }}</td>
+                    <td>{{ staff.admin.first_name }}</td>
+                    <td>{{ staff.admin.last_name }}</td>
+                    <td>{{ staff.admin.username }}</td>
+                    <td>
+                      {% if staff.profile_pic %}
+                        <img src="{{ staff.profile_pic.url }}" style="width:100px; height:auto; border-radius:8px;"/>
+                      {% else %}
+                        <p class="text-danger">No Image</p>
+                      {% endif %}
+                    </td>
+                    <td>{{ staff.admin.email }}</td>
+                    <td>{{ staff.mobile_number }}</td>
+                    <td>{{ staff.address }}</td>
+                    <td>{{ staff.admin.last_login }}</td>
+                    <td>{{ staff.admin.date_joined }}</td>
+                    <td class="text-center">
+                      <a href="/edit_staff/{{ staff.admin.id }}" class="btn btn-success btn-sm">Edit</a>
+                      <a href="{% url 'delete_staff' staff.id %}" class="btn btn-danger btn-sm"
+                         onclick="return confirm('Are you sure you want to delete this staff member?');">
+                         Delete
+                      </a>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+      </div>
+    </div>
+  </div><!-- /.container-fluid -->
+</section>
+
+<!-- jQuery for AJAX -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Font Awesome for the search icon -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+<script>
+  $(document).ready(function() {
+    $("#search-input").on("keyup", function() {
+      let query = $(this).val().trim();
+
+      $.ajax({
+        url: "{% url 'manage_staff' %}", // Make sure this URL is correct and points to your view
+        type: "GET",
+        data: {'q': query},
+        dataType: "json",
+        success: function(data) {
+          let tableBody = $("#staff-table-body");
+          tableBody.empty();
+
+          if (data.staffs.length === 0) {
+            tableBody.append('<tr><td colspan="11" class="text-center text-danger">No staff found.</td></tr>');
+          } else {
+            $.each(data.staffs, function(index, staff) {
+              let profilePicHtml = staff.profile_pic
+                  ? `<img src="${staff.profile_pic}" style="width:100px; height:auto; border-radius:8px;"/>`
+                  : `<p class="text-danger">No Image</p>`;
+
+              let rowHtml = `
+                <tr>
+                  <td>${staff.id}</td>
+                  <td>${staff.first_name}</td>
+                  <td>${staff.last_name}</td>
+                  <td>${staff.username}</td>
+                  <td>${profilePicHtml}</td>
+                  <td>${staff.email}</td>
+                  <td>${staff.mobile_number}</td>
+                  <td>${staff.address}</td>
+                  <td>${staff.last_login}</td>
+                  <td>${staff.date_joined}</td>
+                  <td class="text-center">
+                    <a href="/edit_staff/${staff.id}" class="btn btn-success btn-sm">Edit</a>
+                    <a href="/delete_staff/${staff.id}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this staff member?');">Delete</a>
+                  </td>
+                </tr>
+              `;
+              tableBody.append(rowHtml);
+            });
+          }
+        },
+        error: function(xhr, status, error) {
+          console.error("AJAX request failed:", status, error);
+          alert("An error occurred while searching. Please check the console."); // User-friendly error message
+        }
+      });
+    });
+  });
+</script>
+
+{% endblock main_content %}

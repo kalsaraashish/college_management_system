@@ -1,0 +1,102 @@
+{% extends 'hod_template/base_template.html' %}
+{% block page_title %}
+Add Course
+{% endblock page_title %}
+{% block main_content %}
+ <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+            <!-- general form elements -->
+            <div class="card card-primary">
+              <div class="card-header">
+                <h3 class="card-title">Add Course</h3>
+              </div>
+              <!-- /.card-header -->
+              <!-- form start -->
+              <form role="form" action="/add_course_save" method="post">
+                  {% csrf_token %}
+                <div class="card-body">
+                  <div class="form-group">
+                    <label>Course Name</label>
+                    <input type="text" class="form-control" name="course" placeholder="Enter Course">
+                  </div>
+                <div class="form-group">
+                  {% if messages %}
+                        {% for message in messages %}
+                        {% if message.tags == 'error' %}
+                        <div class="alert alert-danger" style="margin-top:10px">{{ message }}</div>
+                        {% endif %}
+                        {% if message.tags == 'success' %}
+                        <div class="alert alert-success" style="margin-top:10px">{{ message }}</div>
+                        {% endif %}
+                        {% endfor %}
+
+                  {% endif %}
+                </div>
+
+
+                </div>
+                <!-- /.card-body -->
+
+                <div class="card-footer">
+                  <button type="submit" class="btn btn-primary btn-block">Add Course</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+    <!-- /.content -->
+{% endblock main_content %}
+{% block custom_js %}
+<script>
+    $(document).ready(function () {
+        let courseInput = $("input[name='course']");
+        let submitBtn = $("button[type='submit']");
+
+        function validateCourse() {
+            let valid = true;
+            let courseName = courseInput.val().trim();
+
+            // Check if the course name is empty
+            if (courseName === "") {
+                showError(courseInput, "Course name cannot be empty.");
+                valid = false;
+            } else {
+                removeError(courseInput);
+            }
+
+            // Enable/Disable Submit Button
+            submitBtn.prop("disabled", !valid);
+        }
+
+        function showError(input, message) {
+            removeError(input);
+            $("<span class='error-message' style='color: red; font-size: 14px; display: block; margin-top: 5px;'>"
+                + message + "</span>").insertAfter(input);
+        }
+
+        function removeError(input) {
+            input.next(".error-message").remove();
+        }
+
+        // Attach event listener for real-time validation
+        courseInput.keyup(validateCourse);
+
+        // Validate on form submission
+        $("form").submit(function (event) {
+            validateCourse();
+            if (submitBtn.prop("disabled")) {
+                event.preventDefault(); // Prevent form submission if invalid
+            }
+        });
+
+        // Initial validation check
+        validateCourse();
+    });
+</script>
+{% endblock custom_js %}
+

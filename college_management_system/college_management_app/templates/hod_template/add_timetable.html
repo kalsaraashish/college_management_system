@@ -1,0 +1,25 @@
+{% extends 'hod_template/base_template.html' %}
+
+{% block page_title %}
+    Add Timetable
+{% endblock page_title %}
+
+{% block main_content %}
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card card-primary">
+                        <div class="card-header">
+                            <h3 class="card-title">Add Timetable</h3>
+                        </div>
+
+                        {% url 'add_timetable_save' as action_path %}
+                        {% include 'hod_template/form_template.html' with messages=messages form=form action_path=action_path button_text="Add Timetable" %}
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock main_content %}
